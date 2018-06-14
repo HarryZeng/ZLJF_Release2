@@ -137,9 +137,9 @@ void menu(void)
 					if(OUT1_Mode.DelayMode == TOFF)
 						DispalyNo = 0;
 					else if(OUT1_Mode.DelayMode == OFFD)
-						DispalyNo = 1;
-					else if(OUT1_Mode.DelayMode == ON_D)
 						DispalyNo = 2;
+					else if(OUT1_Mode.DelayMode == ON_D)
+						DispalyNo = 1;
 					else if(OUT1_Mode.DelayMode == SHOT)
 						DispalyNo = 3;
 				}
@@ -755,7 +755,7 @@ void MenuTwo_OUT1_DelaySET(void)
 				lastCounter = UpButton.PressCounter;
 				UpButton.PressCounter = 0;
 				DispalyNo++;
-				if(DispalyNo>3)
+				if(DispalyNo>1)
 					DispalyNo = 0;
 			}
 			if(DownButton.PressCounter !=lastCounter && DownButton.Effect==PressShort)
@@ -764,7 +764,7 @@ void MenuTwo_OUT1_DelaySET(void)
 				DownButton.PressCounter = 0;
 				DispalyNo--;
 				if(DispalyNo<0)
-					DispalyNo = 3;
+					DispalyNo = 1;
 			}
 			if(ModeButton.PressCounter>=(TimerDisplayIndex)) 
 			{
@@ -774,7 +774,8 @@ void MenuTwo_OUT1_DelaySET(void)
 		}
 		
 		/*OFFD mode*/
-		while(DispalyNo==1)
+		//while(DispalyNo==1)
+		while(0)
 		{
 				MenuTwo_OUT1_OFFD();
 				if(UpButton.PressCounter !=lastCounter && UpButton.Effect==PressShort)
@@ -796,7 +797,7 @@ void MenuTwo_OUT1_DelaySET(void)
 				if(ModeButton.PressCounter>=(TimerDisplayIndex+1)) break;
 		}
 		/*ON_D mode*/
-		while(DispalyNo==2)
+		while(DispalyNo==1)
 		{
 				MenuTwo_OUT1_ON_D();
 				if(UpButton.PressCounter !=lastCounter && UpButton.Effect==PressShort)
@@ -804,7 +805,7 @@ void MenuTwo_OUT1_DelaySET(void)
 					//lastCounter = UpButton.PressCounter;
 					UpButton.PressCounter = 0;
 					DispalyNo++;
-					if(DispalyNo>3)
+					if(DispalyNo>1)
 						DispalyNo = 0;
 				}
 				if(DownButton.PressCounter !=lastCounter && DownButton.Effect==PressShort)
@@ -813,11 +814,12 @@ void MenuTwo_OUT1_DelaySET(void)
 					DownButton.PressCounter = 0;
 					DispalyNo--;
 					if(DispalyNo<0)
-						DispalyNo = 3;
+						DispalyNo = 1;
 				}
 				if(ModeButton.PressCounter>=(TimerDisplayIndex+1)) break;
 		}
-		while(DispalyNo==3)
+		//while(DispalyNo==3)
+		while(0)
 		{
 				MenuTwo_OUT1_SHOT();
 				if(UpButton.PressCounter !=lastCounter && UpButton.Effect==PressShort)
@@ -1297,74 +1299,106 @@ void MenuTwo_OUT1_SHOT(void)
 void MenuTwo_DEL(void)
 {
 		static uint8_t lastCounter;
-
+	uint8_t Flashflag=0;
 			SMG_DisplayMenuTwo_DEL_SET(DEL,0);
 			
-			
-			/*Up Button*/
-			if(UpButton.PressCounter !=lastCounter && UpButton.Effect==PressShort)
+	/*Up Button*/
+	if(UpButton.PressCounter !=lastCounter && UpButton.Effect==PressShort)
+	{
+		lastCounter = UpButton.PressCounter;
+		UpButton.PressCounter = 0;
+		DEL = DEL+1;
+		Flashflag = 1;
+	}
+	else 	if(UpButton.Status==Press&&(UpButton.Effect==PressLong))
+	{				/*还按着按键，并且时间超过长按时间*/
+		UpButton.PressCounter = 0;
+		if(UpButton.PressTimer<KEY_LEVEL_1)
+		{
+			if(UpButton.PressTimer%KEY_LEVEL_1_SET==0&&tempPress == 1)
 			{
-				lastCounter = UpButton.PressCounter;
-				UpButton.PressCounter = 0;
+				tempPress = 0;
 				DEL = DEL+1;
+				Flashflag = 1;
 			}
-			else 	if(UpButton.Status==Press&&(UpButton.Effect==PressLong))
-			{				/*还按着按键，并且时间超过长按时间*/
-				UpButton.PressCounter = 0;
-				if(UpButton.PressTimer<KEY_LEVEL_1)
-				{
-					if(UpButton.PressTimer%KEY_LEVEL_1_SET==0)
-						DEL = DEL+1;
-				}
-				else if(UpButton.PressTimer>KEY_LEVEL_1&&UpButton.PressTimer<KEY_LEVEL_2)
-				{
-					if(UpButton.PressTimer%KEY_LEVEL_2_SET==0)
-						DEL = DEL+1;
-				}
-				else 
-				{
-					if(UpButton.PressTimer%KEY_LEVEL_3_SET==0)
-						DEL = DEL+1;
-				}
-			}	
-			else
+		}
+		else if(UpButton.PressTimer>KEY_LEVEL_1&&UpButton.PressTimer<KEY_LEVEL_2)
+		{
+			if(UpButton.PressTimer%KEY_LEVEL_2_SET==0&&tempPress == 1)
 			{
-				UpButton.Effect = PressShort;
-			}	
-				/*Down Button*/
-			if(DownButton.PressCounter !=lastCounter && DownButton.Effect==PressShort)
+				tempPress = 0;
+				DEL = DEL+2;
+				Flashflag = 1;
+			}
+		}
+		else 
+		{
+			if(UpButton.PressTimer%KEY_LEVEL_3_SET==0&&tempPress == 1)
 			{
-				DownButton.PressCounter = 0;
+				tempPress = 0;
+				DEL = DEL+5;
+				Flashflag = 1;
+			}
+		}
+	}	
+	else
+	{
+		UpButton.Effect = PressShort;
+	}
+	
+	/*Down Button*/
+	if(DownButton.PressCounter !=lastCounter && DownButton.Effect==PressShort)
+	{
+		DownButton.PressCounter = 0;
+		DEL = DEL-1;
+		Flashflag = 1;
+	}
+	else 	if(DownButton.Status==Press&&(DownButton.Effect==PressLong))
+	{				/*还按着按键，并且时间超过长按时间*/
+		DownButton.PressCounter = 0;
+		if(DownButton.PressTimer<KEY_LEVEL_1)
+		{
+			if(DownButton.PressTimer%KEY_LEVEL_1_SET==0&&tempPress == 1)
+			{
+				tempPress = 0;
 				DEL = DEL-1;
+				Flashflag = 1;
 			}
-			else if(DownButton.Status==Press&&(DownButton.Effect==PressLong))
-			{				/*还按着按键，并且时间超过长按时间*/
-				DownButton.PressCounter = 0;
-				if(DownButton.PressTimer<KEY_LEVEL_1)
-				{
-					if(DownButton.PressTimer%KEY_LEVEL_1_SET==0)
-						DEL = DEL-1;
-				}
-				else if(DownButton.PressTimer>KEY_LEVEL_1&&DownButton.PressTimer<KEY_LEVEL_2)
-				{
-					if(DownButton.PressTimer%KEY_LEVEL_2_SET==0)
-						DEL = DEL-1;
-				}
-				else 
-				{
-					if(DownButton.PressTimer%KEY_LEVEL_3_SET==0)
-						DEL = DEL-1;
-				}
-			}	
-			else
+		}
+		else if(DownButton.PressTimer>KEY_LEVEL_1&&DownButton.PressTimer<KEY_LEVEL_2)
+		{
+			if(DownButton.PressTimer%KEY_LEVEL_2_SET==0&&tempPress == 1)
 			{
-				DownButton.Effect = PressShort;
+				tempPress = 0;
+				DEL = DEL-2;
+				Flashflag = 1;
 			}
-			
-			if(DEL>=3000)
-				DEL = 3000;
-			else if(DEL<=50)
-					DEL = 50;
+		}
+		else 
+		{
+			if(DownButton.PressTimer%KEY_LEVEL_3_SET==0&&tempPress == 1)
+			{
+				tempPress = 0;
+				DEL = DEL-5;
+				Flashflag = 1;
+			}
+		}
+	}
+	else
+	{
+		DownButton.Effect = PressShort;
+	}
+	
+	if(DEL<=50)
+			DEL =50;
+	else if(DEL>=3000)
+			DEL =3000;
+	
+		if(EventFlag&Blink500msFlag && Flashflag==1) 
+		{
+			EventFlag = EventFlag &(~Blink500msFlag);  //清楚标志位
+			WriteFlash(DEL_FLASH_DATA_ADDRESS,DEL);
+		}
 }
 
 

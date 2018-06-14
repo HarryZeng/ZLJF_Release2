@@ -611,10 +611,10 @@ void SMG_DisplayMenuTwo_ON_Delay(void)
 	
 		if(Blinkflag)
 		{
-		SMG_data_Decode_table[0][4]=data_SMG_seg_table[13];						//D5	d
-		SMG_data_Decode_table[0][5]=data_SMG_seg_table[16];						//D6	-
-		SMG_data_Decode_table[0][6]=data_SMG_seg_table[18];						//D7	n
-		SMG_data_Decode_table[0][7]=data_SMG_seg_table[17];						//D8	o
+		SMG_data_Decode_table[0][4]=data_SMG_seg_table[13];											//D5	d
+		SMG_data_Decode_table[0][5]=data_SMG_seg_table[15];											//D6	f
+		SMG_data_Decode_table[0][6]=data_SMG_seg_table[15];											//D7	f
+		SMG_data_Decode_table[0][7]=data_SMG_seg_table[17];											//D8	o
 			Blinkflag = 0;
 		}
 		else
@@ -680,10 +680,10 @@ void SMG_DisplayMenuTwo_ON_Delay_SET(int16_t ON_DELAY,uint8_t BlinkONOFF)
 			else
 				SMG_data_Decode_table[0][3]=data_SMG_seg_table[22];										//none
 	}
-		SMG_data_Decode_table[0][4]=data_SMG_seg_table[13];						//D5	d
-		SMG_data_Decode_table[0][5]=data_SMG_seg_table[16];						//D6	-
-		SMG_data_Decode_table[0][6]=data_SMG_seg_table[18];						//D7	n
-		SMG_data_Decode_table[0][7]=data_SMG_seg_table[17];						//D8	o
+		SMG_data_Decode_table[0][4]=data_SMG_seg_table[13];											//D5	d
+		SMG_data_Decode_table[0][5]=data_SMG_seg_table[15];											//D6	f
+		SMG_data_Decode_table[0][6]=data_SMG_seg_table[15];											//D7	f
+		SMG_data_Decode_table[0][7]=data_SMG_seg_table[17];											//D8	o
 	
 }
 

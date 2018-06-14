@@ -28,7 +28,7 @@
 /*DSP库宏定义：ARM_MATH_CM0*/
 
 uint32_t DealyBaseTime = 8;
-uint16_t DEL = 50;
+uint16_t DEL = 100;
 
 int16_t HI = 1000;
 int16_t LO = 700;
@@ -38,7 +38,7 @@ uint8_t RegisterA = 0;
 uint8_t LastRegisterA = 0;
 uint8_t RegisterB = 1;
 uint8_t RegisterC = 0;
-uint8_t OUT1 = 0;
+uint8_t OUT1 = 1;
 uint8_t OUT2 = 0;
 uint8_t OUT3 = 0;
 int16_t OUT2_TimerCounter = 0;
@@ -298,6 +298,7 @@ uint8_t RegisterA_0_Counter = 0;
 uint8_t TempRegisterA = 0;
 int16_t DMA_ADC_Counter = 0;
 uint8_t CheckCounter = 0;
+int32_t ADC_Start_Counter=0;
 void DMA1_Channel1_IRQHandler(void)
 {
 
@@ -310,53 +311,58 @@ void DMA1_Channel1_IRQHandler(void)
 		{
 			SA_Sum += adc_dma_tab[DMA_Counter++];
 		}
-		if (GPIO_ReadInputDataBit(COMP_OUT1_GPIO_Port, COMP_OUT1_Pin)==Bit_RESET) //运放是低，则有物体通过
+		ADC_Start_Counter++;
+		if(ADC_Start_Counter>50)
 		{
-			CheckCounter++;
-			DMA_ADC_Counter++;
-			SA_Final = SA_Sum / DMA_Channel;
-			S_Total_SUM += SA_Final;
-			SA_Sum = 0;
-
-			if (DMA_ADC_Counter >= 4096)
+			if (GPIO_ReadInputDataBit(COMP_OUT1_GPIO_Port, COMP_OUT1_Pin)) //运放为高，则有物体通过
 			{
-				DMA_ADC_Counter = 0;
-				S_Total_Final = S_Total_SUM / 4096;
-				S_Total_SUM = 0;
-				/*赋值给DAC*/
-				DACOUT1 = S_Total_Final + DEL;
-				DAC_SetChannel1Data(DAC_Align_12b_R, (uint16_t)DACOUT1);
-				DAC_SoftwareTriggerCmd(DAC_Channel_1, ENABLE);
+				CheckCounter++;
+				DMA_ADC_Counter++;
+				SA_Final = SA_Sum / DMA_Channel;
+				S_Total_SUM += SA_Final;
+				SA_Sum = 0;
+
+				if (DMA_ADC_Counter >= 4096)
+				{
+					DMA_ADC_Counter = 0;
+					S_Total_Final = S_Total_SUM / 4096;
+					S_Total_SUM = 0;
+					/*赋值给DAC*/
+					DACOUT1 = S_Total_Final + DEL;
+					DAC_SetChannel1Data(DAC_Align_12b_R, (uint16_t)DACOUT1);
+					DAC_SoftwareTriggerCmd(DAC_Channel_1, ENABLE);
+				}
+				/*累计10个*/
+				if (CheckCounter % 10 == 0 && CheckCounter!=0)
+				{
+					RegisterA = 0;
+					CheckCounter = 0;
+				}
+
+				sample_finish = 1;
 			}
-			/*累计10个*/
-			if (CheckCounter % 10 == 0)
+			else
 			{
 				RegisterA = 1;
+				CheckCounter = 0;
 			}
 
-			sample_finish = 1;
-		}
-		else
-		{
-			RegisterA = 0;
-			CheckCounter = 0;
-		}
+			/*设置OUT1的状态*/
+			SetOUT1Status();
 
-		/*设置OUT1的状态*/
-		SetOUT1Status();
-
-		if (LastRegisterA == 0 && RegisterA == 1)
-		{
-			CPV++;
-			if (CPV >= CSV) /*如果计数器达到预先设定的CSV，清零，OUT2输出一个高电平*/
-			{
-				OUT2 = 1;
-				CPV = 0;
-			}
+//			if (LastRegisterA == 1 && RegisterA == 0)
+//			{
+//				CPV++;
+//				if (CPV >= CSV) /*如果计数器达到预先设定的CSV，清零，OUT2输出一个高电平*/
+//				{
+//					OUT2 = 1;
+//					CPV = 0;
+//				}
+//			}
+			/*显示OUT1和OUT2的状态*/
+			SMG_DisplayOUT_STATUS(OUT1, OUT2);
+			//LastRegisterA = RegisterA;
 		}
-		/*显示OUT1和OUT2的状态*/
-		SMG_DisplayOUT_STATUS(OUT1, OUT2);
-		LastRegisterA = RegisterA;
 	}
 	DMA_ClearITPendingBit(DMA_IT_TC); //清楚DMA中断标志位
 }
@@ -1247,6 +1253,7 @@ void SetRegisterA(uint32_t ADCTestValue)
 *
 *******************************/
 uint8_t SHOTflag = 0;
+uint8_t CPV_Status=0;
 void SetOUT1Status(void)
 {
 	if (ShortCircuit != 1) /*不是短路保护的情况下才判断OUT1的输出*/
@@ -1259,6 +1266,7 @@ void SetOUT1Status(void)
 			RegisterB = 1;
 
 		OUT1 = !(RegisterB ^ RegisterA);
+		
 		if (OUT1_Mode.DelayMode == TOFF)
 		{
 			//GPIOA->ODR ^= GPIO_Pin_9;
@@ -1266,6 +1274,7 @@ void SetOUT1Status(void)
 			{
 				GPIO_WriteBit(OUT1_GPIO_Port, OUT1_Pin, Bit_RESET);
 				OUT1_Mode.DelayCounter = 0;
+				CPV_Status = 1;
 			}
 			else
 			{
@@ -1280,12 +1289,14 @@ void SetOUT1Status(void)
 			{
 				GPIO_WriteBit(OUT1_GPIO_Port, OUT1_Pin, Bit_RESET);
 				OUT1_Mode.DelayCounter = 0;
+				
 			}
 			else
 			{
 				if (OUT1_Mode.DelayCounter > (OUT1_Mode.DelayValue * DealyBaseTime))
 				{
 					GPIO_WriteBit(OUT1_GPIO_Port, OUT1_Pin, Bit_SET);
+					CPV_Status = 1;
 				}
 			}
 		}
@@ -1297,6 +1308,7 @@ void SetOUT1Status(void)
 				if (OUT1_Mode.DelayCounter > (OUT1_Mode.DelayValue * DealyBaseTime))
 				{
 					GPIO_WriteBit(OUT1_GPIO_Port, OUT1_Pin, Bit_RESET);
+					CPV_Status = 1;
 				}
 			}
 			else
@@ -1327,6 +1339,17 @@ void SetOUT1Status(void)
 				GPIO_WriteBit(OUT1_GPIO_Port, OUT1_Pin, Bit_RESET);
 			}
 		}
+			if(LastOUT1 == 0 && OUT1 == 1 && CPV_Status == 1)
+			{
+				CPV++;
+				CPV_Status = 0;
+				if (CPV >= CSV) /*如果计数器达到预先设定的CSV，清零，OUT2输出一个高电平*/
+				{
+					OUT2 = 1;
+					CPV = 0;
+				}
+			}		
+			LastOUT1 = OUT1;
 	}
 }
 /*******************************
@@ -1556,7 +1579,7 @@ void ResetParameter(void)
 	OUT1_Mode.DelayMode = TOFF;
 	OUT1_Mode.DelayValue = 10;
 	ATT100 = 100;
-	DEL = 4;
+	DEL = 100;
 	RegisterB = 1;
 	HI = 1000;
 	LO = 700;
