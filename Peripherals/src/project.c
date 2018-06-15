@@ -349,7 +349,8 @@ void DMA1_Channel1_IRQHandler(void)
 
 			/*设置OUT1的状态*/
 			SetOUT1Status();
-
+			/*OUT2输出*/
+			SetOUT2Status();
 //			if (LastRegisterA == 1 && RegisterA == 0)
 //			{
 //				CPV++;
@@ -595,9 +596,6 @@ void Main_Function(void)
 
 			/*按键复用*/
 			ButtonMapping();
-
-			/*OUT2输出*/
-			SetOUT2Status();
 
 			if (KEY == ULOC) /*判断按键是否上锁*/
 			{
