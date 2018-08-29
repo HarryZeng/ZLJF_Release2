@@ -8,7 +8,7 @@
 #include "stm32f10x_tim.h"
 #include "stm32f10x_flash.h"
 //#include "stm32f10x_dac.h"
-//#include "stm32f10x_exti.h"
+#include "stm32f10x_exti.h"
 #include "stm32f10x_iwdg.h"
 #include "stm32f10x_pwr.h"
 #include "bsp_init.h"
@@ -31,6 +31,7 @@ extern uint8_t OUT3;
 extern uint8_t OUT2;
 extern uint8_t OUT1;
 extern uint32_t CPV;
+extern uint8_t PVD_Flag;
 
 void timer_init(void);
 void GPIO_Config(void);
@@ -71,7 +72,7 @@ void TIM4_IRQHandler()
 }
 
 extern bool timeflag;
-extern uint32_t tempPress;
+extern uint32_t KeytempPress;
 
 void TIM2_IRQHandler()
 {
@@ -101,9 +102,9 @@ void TIM2_IRQHandler()
 		{
 
 			Key_Scan(); //定时扫描按键
-			tempPress = 1;
+			KeytempPress = 1;
 		}
-		if (timenum >= 5000) /*5000*100us = 500,000us = 500ms*/
+		if (timenum >= 4000) /*5000*100us = 500,000us = 500ms*/
 		{
 			GetTotalADCValue();
 			timeflag = !timeflag;
@@ -133,15 +134,22 @@ void TIM3_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update); //清除update事件中断标志
 	}
 }
-
+void PVD_IRQHandler(void)
+{
+	if(EXTI_GetITStatus(EXTI_Line16) != RESET)
+	{
+		PVD_Flag = 1;
+		/* Clear the Key Button EXTI line pending bit */
+		EXTI_ClearITPendingBit(EXTI_Line16);
+	}
+}
 /******************************************
  BSP 底层初始化
 ******************************************/
 void bsp_init(void)
 {
 	RCC_Configuration();
-	PWR_PVDLevelConfig(PWR_PVDLevel_2V9); /*设置PVD电压检测*/
-	PWR_PVDCmd(ENABLE);
+	PVD_init();
 	TIM2_init();
 	TIM3_init();
 	ADC1_Configuration();

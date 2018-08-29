@@ -805,23 +805,23 @@ void SMG_DisplayMenuTwo_DEL(void)
 void SMG_DisplayMenuTwo_DEL_SET(int16_t DEL,uint8_t BlinkONOFF)
 {
 		static uint8_t Blinkflag=1;
-		uint8_t k_SHOT;
+		uint8_t k_DEL;
 		
-		k_SHOT = GetIntNumber(DEL);
+		k_DEL = GetIntNumber(DEL);
 	if(BlinkONOFF)
 	{
 		if(Blinkflag)
 		{
 			SMG_data_Decode_table[0][0]=data_SMG_seg_table[DEL%10];					//D1
-			if(k_SHOT>=2)
+			if(k_DEL>=2)
 				SMG_data_Decode_table[0][1]=data_SMG_seg_table[(DEL/10)%10];			//D2
 			else
 				SMG_data_Decode_table[0][1]=data_SMG_seg_table[22];										//none
-			if(k_SHOT>=3)
+			if(k_DEL>=3)
 				SMG_data_Decode_table[0][2]=data_SMG_seg_table[(DEL/100)%10];		//D3
 			else
 				SMG_data_Decode_table[0][2]=data_SMG_seg_table[22];										//none
-			if(k_SHOT>=4)
+			if(k_DEL>=4)
 				SMG_data_Decode_table[0][3]=data_SMG_seg_table[(DEL/1000)%10];		//D4
 			else
 				SMG_data_Decode_table[0][3]=data_SMG_seg_table[22];										//none
@@ -839,15 +839,15 @@ void SMG_DisplayMenuTwo_DEL_SET(int16_t DEL,uint8_t BlinkONOFF)
 	else
 	{
 			SMG_data_Decode_table[0][0]=data_SMG_seg_table[DEL%10];					//D1
-			if(k_SHOT>=2)
+			if(k_DEL>=2)
 				SMG_data_Decode_table[0][1]=data_SMG_seg_table[(DEL/10)%10];			//D2
 			else
 				SMG_data_Decode_table[0][1]=data_SMG_seg_table[22];										//none
-			if(k_SHOT>=3)
+			if(k_DEL>=3)
 				SMG_data_Decode_table[0][2]=data_SMG_seg_table[(DEL/100)%10];		//D3
 			else
 				SMG_data_Decode_table[0][2]=data_SMG_seg_table[22];										//none
-			if(k_SHOT>=4)
+			if(k_DEL>=4)
 				SMG_data_Decode_table[0][3]=data_SMG_seg_table[(DEL/1000)%10];		//D4
 			else
 				SMG_data_Decode_table[0][3]=data_SMG_seg_table[22];										//none

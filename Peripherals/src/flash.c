@@ -75,7 +75,6 @@ void WriteFlash(uint32_t addr,uint32_t data)
 			tempflashdata = *(__IO uint32_t*)(addr);
 		}
 		WriteInternalFlash(addr,data);
-		
 }
 
 /******************************************

@@ -16,7 +16,7 @@
 #include "project.h"
 #include "key.h"
 
-#define timer_period 6 //ms
+#define timer_period 4 //ms
 #define shortKEY 	100
 #define middleKEY	1000
 #define longKEY		3000

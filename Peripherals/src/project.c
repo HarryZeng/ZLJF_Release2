@@ -28,7 +28,7 @@
 /*DSP库宏定义：ARM_MATH_CM0*/
 
 uint32_t DealyBaseTime = 8;
-uint16_t DEL = 100;
+uint16_t DEL = 300;
 
 int16_t HI = 1000;
 int16_t LO = 700;
@@ -50,6 +50,7 @@ int32_t ADC_Display = 0;
 int32_t DACOUT1 = 1000;
 int32_t DACOUT2 = 1000;
 uint32_t CPV = 0;
+uint8_t PVD_Flag = 0;
 
 Button_STATUS KEY = ULOC;
 uint8_t ConfirmShortCircuit = 0;
@@ -582,15 +583,13 @@ void Main_Function(void)
 	//ATTSet(ATT100);
 	while (1)
 	{
-		if (0)
+		if (PVD_Flag)
 		{
-			Dust_Display();
-			GPIO_WriteBit(OUT1_GPIO_Port, OUT1_Pin, Bit_RESET); /*一直将OUT1拉低*/
+			
 		}
 		else
 		{
 
-			//RealDACOUT = Dac1_Get_Vol();
 			/*正常显示模式*/
 			DisplayMODE();
 
@@ -751,7 +750,7 @@ void DisplayModeONE(void)
 *显示模式1_DETECT_STD
 *
 *******************************/
-uint32_t tempPress = 0;
+uint32_t KeytempPress = 0;
 void DisplayModeONE_STD(void)
 {
 	static uint8_t lastCounter;
@@ -775,25 +774,25 @@ void DisplayModeONE_STD(void)
 			UpButton.PressCounter = 0;
 			if (UpButton.PressTimer <= KEY_LEVEL_1)
 			{
-				if (UpButton.PressTimer % KEY_LEVEL_1_SET == 0 && tempPress == 1)
+				if (UpButton.PressTimer % KEY_LEVEL_1_SET == 0 && KeytempPress == 1)
 				{
 					Threshold = Threshold + 1;
-					tempPress = 0;
+					KeytempPress = 0;
 				}
 			}
 			else if (UpButton.PressTimer > KEY_LEVEL_1 && UpButton.PressTimer <= KEY_LEVEL_2)
 			{
-				if (UpButton.PressTimer % KEY_LEVEL_2_SET == 0 && tempPress == 1)
+				if (UpButton.PressTimer % KEY_LEVEL_2_SET == 0 && KeytempPress == 1)
 				{
-					tempPress = 0;
+					KeytempPress = 0;
 					Threshold = Threshold + 2;
 				}
 			}
 			else
 			{
-				if (UpButton.PressTimer % KEY_LEVEL_3_SET == 0 && tempPress == 1)
+				if (UpButton.PressTimer % KEY_LEVEL_3_SET == 0 && KeytempPress == 1)
 				{
-					tempPress = 0;
+					KeytempPress = 0;
 					Threshold = Threshold + 5;
 				}
 			}
@@ -813,25 +812,25 @@ void DisplayModeONE_STD(void)
 			DownButton.PressCounter = 0;
 			if (DownButton.PressTimer < KEY_LEVEL_1)
 			{
-				if (DownButton.PressTimer % KEY_LEVEL_1_SET == 0 && tempPress == 1)
+				if (DownButton.PressTimer % KEY_LEVEL_1_SET == 0 && KeytempPress == 1)
 				{
 					Threshold = Threshold - 1;
-					tempPress = 0;
+					KeytempPress = 0;
 				}
 			}
 			else if (DownButton.PressTimer > KEY_LEVEL_1 && DownButton.PressTimer < KEY_LEVEL_2)
 			{
-				if (DownButton.PressTimer % KEY_LEVEL_2_SET == 0 && tempPress == 1)
+				if (DownButton.PressTimer % KEY_LEVEL_2_SET == 0 && KeytempPress == 1)
 				{
 					Threshold = Threshold - 2;
-					tempPress = 0;
+					KeytempPress = 0;
 				}
 			}
 			else
 			{
-				if (DownButton.PressTimer % KEY_LEVEL_3_SET == 0 && tempPress == 1)
+				if (DownButton.PressTimer % KEY_LEVEL_3_SET == 0 && KeytempPress == 1)
 				{
-					tempPress = 0;
+					KeytempPress = 0;
 					Threshold = Threshold - 5;
 				}
 			}
@@ -883,25 +882,25 @@ void DisplayModeONE_AREA(void)
 				UpButton.PressCounter = 0;
 				if (UpButton.PressTimer <= KEY_LEVEL_1)
 				{
-					if (UpButton.PressTimer % KEY_LEVEL_1_SET == 0 && tempPress == 1)
+					if (UpButton.PressTimer % KEY_LEVEL_1_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						HI = HI + 1;
 					}
 				}
 				else if (UpButton.PressTimer > KEY_LEVEL_1 && UpButton.PressTimer <= KEY_LEVEL_2)
 				{
-					if (UpButton.PressTimer % KEY_LEVEL_2_SET == 0 && tempPress == 1)
+					if (UpButton.PressTimer % KEY_LEVEL_2_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						HI = HI + 2;
 					}
 				}
 				else
 				{
-					if (UpButton.PressTimer % KEY_LEVEL_3_SET == 0 && tempPress == 1)
+					if (UpButton.PressTimer % KEY_LEVEL_3_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						HI = HI + 5;
 					}
 				}
@@ -928,25 +927,25 @@ void DisplayModeONE_AREA(void)
 				DownButton.PressCounter = 0;
 				if (DownButton.PressTimer < KEY_LEVEL_1)
 				{
-					if (DownButton.PressTimer % KEY_LEVEL_1_SET == 0 && tempPress == 1)
+					if (DownButton.PressTimer % KEY_LEVEL_1_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						HI = HI - 1;
 					}
 				}
 				else if (DownButton.PressTimer > KEY_LEVEL_1 && DownButton.PressTimer < KEY_LEVEL_2)
 				{
-					if (DownButton.PressTimer % KEY_LEVEL_2_SET == 0 && tempPress == 1)
+					if (DownButton.PressTimer % KEY_LEVEL_2_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						HI = HI - 2;
 					}
 				}
 				else
 				{
-					if (DownButton.PressTimer % KEY_LEVEL_3_SET == 0 && tempPress == 1)
+					if (DownButton.PressTimer % KEY_LEVEL_3_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						HI = HI - 5;
 					}
 				}
@@ -987,25 +986,25 @@ void DisplayModeONE_AREA(void)
 				UpButton.PressCounter = 0;
 				if (UpButton.PressTimer <= KEY_LEVEL_1)
 				{
-					if (UpButton.PressTimer % KEY_LEVEL_1_SET == 0 && tempPress == 1)
+					if (UpButton.PressTimer % KEY_LEVEL_1_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						LO = LO + 1;
 					}
 				}
 				else if (UpButton.PressTimer > KEY_LEVEL_1 && UpButton.PressTimer <= KEY_LEVEL_2)
 				{
-					if (UpButton.PressTimer % KEY_LEVEL_2_SET == 0 && tempPress == 1)
+					if (UpButton.PressTimer % KEY_LEVEL_2_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						LO = LO + 2;
 					}
 				}
 				else
 				{
-					if (UpButton.PressTimer % KEY_LEVEL_3_SET == 0 && tempPress == 1)
+					if (UpButton.PressTimer % KEY_LEVEL_3_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						LO = LO + 5;
 					}
 				}
@@ -1032,25 +1031,25 @@ void DisplayModeONE_AREA(void)
 				DownButton.PressCounter = 0;
 				if (DownButton.PressTimer < KEY_LEVEL_1)
 				{
-					if (DownButton.PressTimer % KEY_LEVEL_1_SET == 0 && tempPress == 1)
+					if (DownButton.PressTimer % KEY_LEVEL_1_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						LO = LO - 1;
 					}
 				}
 				else if (DownButton.PressTimer > KEY_LEVEL_1 && DownButton.PressTimer < KEY_LEVEL_2)
 				{
-					if (DownButton.PressTimer % KEY_LEVEL_2_SET == 0 && tempPress == 1)
+					if (DownButton.PressTimer % KEY_LEVEL_2_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						LO = LO - 2;
 					}
 				}
 				else
 				{
-					if (DownButton.PressTimer % KEY_LEVEL_3_SET == 0 && tempPress == 1)
+					if (DownButton.PressTimer % KEY_LEVEL_3_SET == 0 && KeytempPress == 1)
 					{
-						tempPress = 0;
+						KeytempPress = 0;
 						LO = LO - 5;
 					}
 				}
@@ -1577,7 +1576,7 @@ void ResetParameter(void)
 	OUT1_Mode.DelayMode = TOFF;
 	OUT1_Mode.DelayValue = 10;
 	ATT100 = 100;
-	DEL = 100;
+	DEL = 300;
 	RegisterB = 1;
 	HI = 1000;
 	LO = 700;
