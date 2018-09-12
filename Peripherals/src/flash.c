@@ -38,6 +38,13 @@ FLASH_Status WriteInternalFlash(uint32_t addr,uint32_t data)
 }
 
 
+void  ProtectionFlashReadOUT(void)
+{
+	FLASH_Unlock(); //不解锁也可以设置读保护
+	FLASH_ReadOutProtection(ENABLE);
+	FLASH_Lock();//上锁
+}
+
 /******************************************
 擦除FLASH
 *******************************************/

@@ -16,7 +16,7 @@
 #include "project.h"
 #include "key.h"
 
-#define timer_period 4 //ms
+#define timer_period 6 //ms
 #define shortKEY 	100
 #define middleKEY	1000
 #define longKEY		3000
@@ -53,7 +53,7 @@ void Button_Init(void)
 	ModeButton.WorkIn = WorkLow;
 	ModeButton.Effect = PressNOEffect;
 	ModeButton.ShortTime = 1*timer_period;  
-	ModeButton.LongTime = 20*timer_period;		
+	ModeButton.LongTime = 65*timer_period;		
 	
 	UpButton.ButtonPort = BUTTON_UP_GPIO_Port;
 	UpButton.ButtonPin = BUTTON_UP_Pin;
@@ -64,7 +64,7 @@ void Button_Init(void)
 	UpButton.WorkIn = WorkLow;
 	UpButton.Effect = PressNOEffect;
 	UpButton.ShortTime = 1*timer_period;
-	UpButton.LongTime = 20*timer_period;
+	UpButton.LongTime = 65*timer_period;
 	
 	DownButton.ButtonPort = BUTTON_DOWN_GPIO_Port;
 	DownButton.ButtonPin = BUTTON_DOWN_Pin;
@@ -75,9 +75,9 @@ void Button_Init(void)
 	DownButton.WorkIn = WorkLow;
 	DownButton.Effect = PressNOEffect;
 	DownButton.ShortTime = 1*timer_period;
-	DownButton.LongTime = 20*timer_period;
+	DownButton.LongTime = 65*timer_period;
 	
-  gpio_init_structure.GPIO_Mode = GPIO_Mode_IPD;                                 
+  gpio_init_structure.GPIO_Mode = GPIO_Mode_IPU;                                 
   gpio_init_structure.GPIO_Speed = GPIO_Speed_2MHz;      
 	
 	gpio_init_structure.GPIO_Pin = UpButton.ButtonPin; 
@@ -107,7 +107,7 @@ void PressCallback(ButtonStruct* Button)
 					Button->PressCounter++;				//记录按键被按下次数
 				}
 			}
-			else// if((Button->PressTimer)<(Button->ShortTime)) 
+			else if((Button->PressTimer>=Button->ShortTime)&&(Button->PressTimer<Button->LongTime)) 
 			{
 				Button->Effect = PressShort;       
 				Button->PressTimer = 0; 
@@ -148,13 +148,17 @@ void Key_Scan(void)
 		{
 			ModeButton.Status = Release;
 		}
-		if(ModeButton.PressTimer>0 && ReadButtonStatus(&ModeButton) == Release)  //按键释放之后再判断按下的时间长度
+		if(ModeButton.PressTimer > ModeButton.ShortTime && ModeButton.PressTimer < ModeButton.LongTime && ReadButtonStatus(&ModeButton) == Release)  //按键释放之后再判断按下的时间长度
 		{
 			PressCallback(&ModeButton);
 		}
 		else if(ModeButton.PressTimer>ModeButton.LongTime && ReadButtonStatus(&ModeButton) == Press) /*长安，还在按下状态*/
 		{
 			PressCallback(&ModeButton);
+		}
+		else if(ModeButton.PressTimer>ModeButton.LongTime && ReadButtonStatus(&ModeButton) == Release) /*长安，释放了*/
+		{
+			ModeButton.PressTimer = 0;
 		}
 		
 		
@@ -168,13 +172,17 @@ void Key_Scan(void)
 		{
 			SetButton.Status = Release;
 		}
-		if(SetButton.PressTimer>0 && ReadButtonStatus(&SetButton) == Release)  //按键释放之后再判断按下的时间长度
+		if(SetButton.PressTimer>SetButton.ShortTime && SetButton.PressTimer < SetButton.LongTime && ReadButtonStatus(&SetButton) == Release)  //按键释放之后再判断按下的时间长度
 		{
 			PressCallback(&SetButton);
 		}
 		else if(SetButton.PressTimer>SetButton.LongTime && ReadButtonStatus(&SetButton)== Press) /*长安，还在按下状态*/
 		{
 			PressCallback(&SetButton);
+		}
+		else if(SetButton.PressTimer>SetButton.LongTime && ReadButtonStatus(&SetButton) == Release) /*长安，释放了*/
+		{
+			SetButton.PressTimer = 0;
 		}
 		
 		/*UP BUTTON*/
@@ -187,7 +195,7 @@ void Key_Scan(void)
 		{
 			UpButton.Status = Release;
 		}
-		if(UpButton.PressTimer>0 && ReadButtonStatus(&UpButton) == Release)  //按键释放之后再判断按下的时间长度
+		if(UpButton.PressTimer>UpButton.ShortTime && UpButton.PressTimer < UpButton.LongTime &&ReadButtonStatus(&UpButton) == Release)  //按键释放之后再判断按下的时间长度
 		{
 			PressCallback(&UpButton);
 		}
@@ -195,6 +203,11 @@ void Key_Scan(void)
 		{
 			PressCallback(&UpButton);
 		}
+		else if(UpButton.PressTimer>UpButton.LongTime && ReadButtonStatus(&UpButton) == Release) /*长安，释放了*/
+		{
+			UpButton.PressTimer = 0;
+		}
+		
 		/*DOWN BUTTON*/
 		if(ReadButtonStatus(&DownButton) == Press )     //DOWN键按下，一直计算按下时长,根据定时器周期性，计算时长									
     {
@@ -205,13 +218,17 @@ void Key_Scan(void)
 		{
 			DownButton.Status = Release;
 		}
-		if(DownButton.PressTimer>0 &&  ReadButtonStatus(&DownButton) == Release)  //按键释放之后再判断按下的时间长度
+		if(DownButton.PressTimer>DownButton.ShortTime && DownButton.PressTimer<DownButton.LongTime &&  ReadButtonStatus(&DownButton) == Release)  //按键释放之后再判断按下的时间长度
 		{
 			PressCallback(&DownButton);
 		}
 		else if(DownButton.PressTimer>DownButton.LongTime && ReadButtonStatus(&DownButton)== Press) /*长安，还在按下状态*/
 		{
 			PressCallback(&DownButton);
+		}
+		else if(DownButton.PressTimer>DownButton.LongTime && ReadButtonStatus(&DownButton) == Release) /*长安，释放了*/
+		{
+			DownButton.PressTimer = 0;
 		}
 }  
 
@@ -226,7 +243,7 @@ Button_Status ReadButtonStatus(ButtonStruct *Button)
 		else
 			return Release;
 	}
-	if(Button->WorkIn == WorkHigh )
+	else if(Button->WorkIn == WorkHigh )
 	{
 		if(PinState==(uint8_t)Bit_SET)
 			return Press;

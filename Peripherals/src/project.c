@@ -300,70 +300,70 @@ uint8_t TempRegisterA = 0;
 int16_t DMA_ADC_Counter = 0;
 uint8_t CheckCounter = 0;
 int32_t ADC_Start_Counter=0;
+extern uint8_t StartFLag;
 void DMA1_Channel1_IRQHandler(void)
 {
-
-	//		if(DMA_GetITStatus(DMA_IT_HT))
-	//				;
-
 	if (DMA_GetITStatus(DMA_IT_TC)) //判断DMA传输完成中断
 	{
-		for (DMA_Counter = 0; DMA_Counter < 16;)
+		if (PVD_Flag==0 && StartFLag )
 		{
-			SA_Sum += adc_dma_tab[DMA_Counter++];
-		}
-		ADC_Start_Counter++;
-		if(ADC_Start_Counter>50)
-		{
-			if (GPIO_ReadInputDataBit(COMP_OUT1_GPIO_Port, COMP_OUT1_Pin)) //运放为高，则有物体通过
-			{
-				CheckCounter++;
-				DMA_ADC_Counter++;
-				SA_Final = SA_Sum / DMA_Channel;
-				S_Total_SUM += SA_Final;
-				SA_Sum = 0;
-
-				if (DMA_ADC_Counter >= 4096)
+				for (DMA_Counter = 0; DMA_Counter < 16;)
 				{
-					DMA_ADC_Counter = 0;
-					S_Total_Final = S_Total_SUM / 4096;
-					S_Total_SUM = 0;
-					/*赋值给DAC*/
-					DACOUT1 = S_Total_Final + DEL;
-					DAC_SetChannel1Data(DAC_Align_12b_R, (uint16_t)DACOUT1);
-					DAC_SoftwareTriggerCmd(DAC_Channel_1, ENABLE);
+					SA_Sum += adc_dma_tab[DMA_Counter++];
 				}
-				/*累计10个*/
-				if (CheckCounter % 10 == 0 && CheckCounter!=0)
+				ADC_Start_Counter++;
+				if(ADC_Start_Counter>50)
 				{
-					RegisterA = 0;
-					CheckCounter = 0;
+					if (GPIO_ReadInputDataBit(COMP_OUT1_GPIO_Port, COMP_OUT1_Pin)) //运放为高，则有物体通过
+					{
+						CheckCounter++;
+						DMA_ADC_Counter++;
+						SA_Final = SA_Sum / DMA_Channel;
+						S_Total_SUM += SA_Final;
+						SA_Sum = 0;
+
+						if (DMA_ADC_Counter >= 4096)
+						{
+							DMA_ADC_Counter = 0;
+							S_Total_Final = S_Total_SUM / 4096;
+							S_Total_SUM = 0;
+							/*赋值给DAC*/
+							DACOUT1 = S_Total_Final + DEL;
+							DAC_SetChannel1Data(DAC_Align_12b_R, (uint16_t)DACOUT1);
+							DAC_SoftwareTriggerCmd(DAC_Channel_1, ENABLE);
+						}
+						/*累计10个*/
+						if (CheckCounter % 10 == 0 && CheckCounter!=0)
+						{
+							RegisterA = 0;
+							CheckCounter = 0;
+						}
+
+						sample_finish = 1;
+					}
+					else
+					{
+						RegisterA = 1;
+						CheckCounter = 0;
+					}
+
+					/*设置OUT1的状态*/
+					SetOUT1Status();
+					/*OUT2输出*/
+					SetOUT2Status();
+		//			if (LastRegisterA == 1 && RegisterA == 0)
+		//			{
+		//				CPV++;
+		//				if (CPV >= CSV) /*如果计数器达到预先设定的CSV，清零，OUT2输出一个高电平*/
+		//				{
+		//					OUT2 = 1;
+		//					CPV = 0;
+		//				}
+		//			}
+					/*显示OUT1和OUT2的状态*/
+					SMG_DisplayOUT_STATUS(OUT1, OUT2);
+					//LastRegisterA = RegisterA;
 				}
-
-				sample_finish = 1;
-			}
-			else
-			{
-				RegisterA = 1;
-				CheckCounter = 0;
-			}
-
-			/*设置OUT1的状态*/
-			SetOUT1Status();
-			/*OUT2输出*/
-			SetOUT2Status();
-//			if (LastRegisterA == 1 && RegisterA == 0)
-//			{
-//				CPV++;
-//				if (CPV >= CSV) /*如果计数器达到预先设定的CSV，清零，OUT2输出一个高电平*/
-//				{
-//					OUT2 = 1;
-//					CPV = 0;
-//				}
-//			}
-			/*显示OUT1和OUT2的状态*/
-			SMG_DisplayOUT_STATUS(OUT1, OUT2);
-			//LastRegisterA = RegisterA;
 		}
 	}
 	DMA_ClearITPendingBit(DMA_IT_TC); //清楚DMA中断标志位
@@ -583,7 +583,7 @@ void Main_Function(void)
 	//ATTSet(ATT100);
 	while (1)
 	{
-		if (PVD_Flag)
+		if (0)
 		{
 			
 		}

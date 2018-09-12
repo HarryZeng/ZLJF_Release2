@@ -38,6 +38,7 @@ void GPIO_Config(void);
 uint8_t FlashCheck(void);
 void GPIO_DEINIT_ALL(void);
 void WriteFlash(uint32_t addr, uint32_t data);
+uint8_t StartFLag=0;
 /*****************************************/
 ///////////////////////////////////////////////////////////////////////////////////
 /**
@@ -78,40 +79,47 @@ void TIM2_IRQHandler()
 {
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update)) //判断发生update事件中断
 	{
-		timenum++;
-		//	_Gpio_7_set;
-		OUT1_Mode.DelayCounter++;
+		if(PVD_Flag==0)
+		{	
+			timenum++;
+			//	_Gpio_7_set;
+			OUT1_Mode.DelayCounter++;
 
-		//GPIOB->ODR ^= GPIO_Pin_8;
-		if (timenum % 10 == 0) /*10us*100us=1000us*/
-		{
-			//_Gpio_7_set;
-			if (OUT2)
-				OUT2_TimerCounter++;
-			if (OUT3)
-				OUT3_TimerCounter++;
+			//GPIOB->ODR ^= GPIO_Pin_8;
+			if (timenum % 10 == 0 && StartFLag) /*10us*100us=1000us*/
+			{
+				//_Gpio_7_set;
+				if (OUT2)
+					OUT2_TimerCounter++;
+				if (OUT3)
+					OUT3_TimerCounter++;
 
-			SMG_Diplay();
-			ShortCircuitLastTime++;
-			if (ShortCircuit)
-				ShortCircuitCounter++;
-			else
-				ShortCircuitCounter = 0;
+				SMG_Diplay();
+				ShortCircuitLastTime++;
+				if (ShortCircuit)
+					ShortCircuitCounter++;
+				else
+					ShortCircuitCounter = 0;
+			}
+			if (timenum % 80 == 0 && StartFLag) /*80us*100us=8000us*/
+			{
+				//_Gpio_7_set;
+				Key_Scan(); //定时扫描按键
+				KeytempPress = 1;
+			}
+			if(timenum % 2000 ==0)
+			{
+				StartFLag = 1;
+			}
+			if (timenum >= 4000) /*5000*100us = 500,000us = 500ms*/
+			{
+				GetTotalADCValue();
+				timeflag = !timeflag;
+				EventFlag = EventFlag | Blink500msFlag;
+				timenum = 0;
+			}
 		}
-		if (timenum % 80 == 0) /*80us*100us=8000us*/
-		{
-
-			Key_Scan(); //定时扫描按键
-			KeytempPress = 1;
-		}
-		if (timenum >= 4000) /*5000*100us = 500,000us = 500ms*/
-		{
-			GetTotalADCValue();
-			timeflag = !timeflag;
-			EventFlag = EventFlag | Blink500msFlag;
-			timenum = 0;
-		}
-		TIM_ClearITPendingBit(TIM2, TIM_IT_Update); //清除update事件中断标志
+				TIM_ClearITPendingBit(TIM2, TIM_IT_Update); //清除update事件中断标志
 	}
 }
 
@@ -146,20 +154,23 @@ void PVD_IRQHandler(void)
 /******************************************
  BSP 底层初始化
 ******************************************/
+
 void bsp_init(void)
 {
 	RCC_Configuration();
-	PVD_init();
+	RCC_GetClocksFreq(&SysClock);
 	TIM2_init();
+	PVD_init();
+	Button_Init();
+	/*等待*/
+	IO_GPIO_INIT();
+	SMG_GPIO_INIT();
 	TIM3_init();
 	ADC1_Configuration();
 #ifdef DAC_OUT_Enable
 	DAC_Configuration();
 #endif
-	RCC_GetClocksFreq(&SysClock);
-	IO_GPIO_INIT();
-	SMG_GPIO_INIT();
-	Button_Init();
+		
 }
 
 int ProgramCounter = 0;
@@ -203,8 +214,10 @@ int main(void)
 
 	bsp_init();
 
+	//ProtectionFlashReadOUT();
+		
 	CheckFLag = FlashCheck();
-
+	
 	//if (1)
 	if(CheckFLag)
 	{

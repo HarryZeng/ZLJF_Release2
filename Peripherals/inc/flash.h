@@ -39,5 +39,6 @@ typedef  struct FLASH_CHANNEL
 void WriteFlash(uint32_t addr,uint32_t data);	 
 uint32_t  ReadFlash(uint32_t addr);
 void EraseFlash(void);
+void  ProtectionFlashReadOUT(void);
 
 #endif
