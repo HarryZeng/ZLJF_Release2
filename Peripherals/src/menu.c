@@ -72,7 +72,7 @@ void menu(void)
 				DX_Flag = 0;
 				DX = 0;
 				S1024 = 0;
-				ModeButton.PressCounter = 0;
+				ModeButton.PressCounter = 1;
 				UpButton.PressCounter = 0;
 				MenuTwo_DEL();
 				   

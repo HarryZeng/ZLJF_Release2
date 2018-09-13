@@ -177,65 +177,45 @@
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>DACOUT1,0x0A</ItemText>
+          <ItemText>OUT1_Mode.DelayMode,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>S_Total_Final</ItemText>
+          <ItemText>DEL,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>2</WinNumber>
-          <ItemText>FormulaCheck</ItemText>
+          <ItemText>PVD_Flag</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>2</WinNumber>
-          <ItemText>ModeButton.PressCounter</ItemText>
+          <ItemText>Threshold,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>2</WinNumber>
-          <ItemText>OUT1_Mode.DelayMode,0x0A</ItemText>
+          <ItemText>DownButton,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>2</WinNumber>
-          <ItemText>DEL,0x0A</ItemText>
+          <ItemText>UpButton,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>2</WinNumber>
-          <ItemText>PVD_Flag</ItemText>
+          <ItemText>ModeButton,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>2</WinNumber>
-          <ItemText>Threshold,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>DownButton,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>9</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>UpButton,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>10</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>ModeButton,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>11</count>
-          <WinNumber>2</WinNumber>
           <ItemText>StartFLag</ItemText>
         </Ww>
         <Ww>
-          <count>12</count>
+          <count>8</count>
           <WinNumber>2</WinNumber>
           <ItemText>timenum,0x0A</ItemText>
         </Ww>
