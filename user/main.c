@@ -39,6 +39,7 @@ uint8_t FlashCheck(void);
 void GPIO_DEINIT_ALL(void);
 void WriteFlash(uint32_t addr, uint32_t data);
 uint8_t StartFLag=0;
+uint8_t CheckStartFLag=1;
 /*****************************************/
 ///////////////////////////////////////////////////////////////////////////////////
 /**
@@ -113,6 +114,7 @@ void TIM2_IRQHandler()
 			}
 			if (timenum >= 4000) /*5000*100us = 500,000us = 500ms*/
 			{
+				CheckStartFLag = 0;
 				GetTotalADCValue();
 				timeflag = !timeflag;
 				EventFlag = EventFlag | Blink500msFlag;
@@ -170,25 +172,28 @@ void bsp_init(void)
 #ifdef DAC_OUT_Enable
 	DAC_Configuration();
 #endif
-		
+	
 }
 
-int ProgramCounter = 0;
+uint32_t ProgramCounter = 0;
 void ProgramCheck(void)
 {
-	ProgramCounter = ReadFlash(ProgramRUNcounter_Mode_FLASH_DATA_ADDRESS);
-	if (ProgramCounter > 65535 || ProgramCounter < 0)
+	//ProgramCounter = ReadFlash(ProgramRUNcounter_Mode_FLASH_DATA_ADDRESS);
+	ProgramCounter 		= *(__IO uint32_t*)(ProgramRUNcounter_Mode_FLASH_DATA_ADDRESS);
+	//if (ProgramCounter > 65535 || ProgramCounter < 0)
+	if(ProgramCounter == 0xFFFFFFFF)
 	{
-		ProgramCounter = 0;
+		//ProgramCounter = 0;
 		ResetParameter();
+		WriteFlash(ProgramRUNcounter_Mode_FLASH_DATA_ADDRESS, 0x0505);
 	}
-	ProgramCounter = ProgramCounter + 1;
-	WriteFlash(ProgramRUNcounter_Mode_FLASH_DATA_ADDRESS, ProgramCounter);
+	//ProgramCounter = ProgramCounter + 1;
+	//WriteFlash(ProgramRUNcounter_Mode_FLASH_DATA_ADDRESS, ProgramCounter);
 	DelaymsSet(50);
-	if (ProgramCounter <= 1)
-	{
-		ResetParameter();
-	}
+//	if (ProgramCounter <= 1)
+//	{
+//		ResetParameter();
+//	}
 }
 
 void IWDG_Config(void)
@@ -215,7 +220,9 @@ int main(void)
 	bsp_init();
 
 	//ProtectionFlashReadOUT();
-		
+	
+	//while(CheckStartFLag){}
+	
 	CheckFLag = FlashCheck();
 	
 	//if (1)
