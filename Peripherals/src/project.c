@@ -1454,26 +1454,26 @@ void ButtonMapping(void)
 		DownButton.Effect = PressNOEffect;
 	}
 	/*软件初始化*/
-//	else if (ModeButton.Effect == PressLong && SetButton.Effect == PressLong && SetButton.Status == Press && UpButton.Status == Release && DownButton.Status == Release)
-//	{
-//		takeoffLED();
-//		while ((ReadButtonStatus(&ModeButton)) == Press && (ReadButtonStatus(&SetButton) == Press))
-//		{
-//			EraseFlash();
-//			while ((ReadButtonStatus(&ModeButton)) == Press && (ReadButtonStatus(&SetButton) == Press))
-//				ButtonMappingDisplay(2);
-//		}
+	else if (ModeButton.Effect == PressLong && UpButton.Effect == PressLong && UpButton.Status == Press && DownButton.Effect == PressLong && DownButton.Status == Press)
+	{
+		takeoffLED();
+		while ((ReadButtonStatus(&ModeButton)) == Press && (ReadButtonStatus(&UpButton) == Press) && (ReadButtonStatus(&DownButton) == Press))
+		{
+			EraseFlash();
+			while ((ReadButtonStatus(&ModeButton)) == Press && (ReadButtonStatus(&UpButton) == Press) && (ReadButtonStatus(&DownButton) == Press))
+				ButtonMappingDisplay(2);
+		}
 
-//		ResetParameter();
+		ResetParameter();
 
-//		ModeButton.PressCounter = 0;
-//		ModeButton.Effect = PressNOEffect;
-//		DownButton.PressCounter = 0;
-//		DownButton.Effect = PressNOEffect;
-//		UpButton.PressCounter = 0;
-//		UpButton.Effect = PressNOEffect;
-//		Test_Delay(1000);
-//	}
+		ModeButton.PressCounter = 0;
+		ModeButton.Effect = PressNOEffect;
+		DownButton.PressCounter = 0;
+		DownButton.Effect = PressNOEffect;
+		UpButton.PressCounter = 0;
+		UpButton.Effect = PressNOEffect;
+		Test_Delay(1000);
+	}
 	/*计算器清零*/
 	else if (ModeButton.Effect == PressLong && UpButton.Status == Press && UpButton.Effect == PressLong && DownButton.Status == Release)
 	{

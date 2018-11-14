@@ -590,7 +590,7 @@ void EXTI_Configuration(void)
   EXTI_ClearITPendingBit(EXTI_Line16); 
   EXTI_InitStructure.EXTI_Line = EXTI_Line16;// PVD连接到中断16线上 
   EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;//使用中断模式
-  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;//电压下降到设定阈值时产生中断
+  EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;//电压下降到设定阈值时产生中断
   EXTI_InitStructure.EXTI_LineCmd = ENABLE;// 使能中断
   EXTI_Init(&EXTI_InitStructure);// 初始化
 }
@@ -623,7 +623,7 @@ void PVD_init(void)
 	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
 	
-	PWR_PVDLevelConfig(PWR_PVDLevel_2V9); /*设置PVD电压检测*/
+	PWR_PVDLevelConfig(PWR_PVDLevel_2V7); /*设置PVD电压检测*/
 	PWR_PVDCmd(ENABLE);
 }
 

@@ -1411,8 +1411,8 @@ void MenuTwo_DEL(void)
 		}
 	}
 	
-	if(DEL<=150)
-			DEL =150;
+	if(DEL<=80)
+			DEL =80;
 	else if(DEL>=3000)
 			DEL =3000;
 	

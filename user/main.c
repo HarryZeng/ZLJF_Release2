@@ -146,12 +146,21 @@ void TIM3_IRQHandler(void)
 }
 void PVD_IRQHandler(void)
 {
-	if(EXTI_GetITStatus(EXTI_Line16) != RESET)
-	{
-		PVD_Flag = 1;
-		/* Clear the Key Button EXTI line pending bit */
-		EXTI_ClearITPendingBit(EXTI_Line16);
-	}
+//	if(EXTI_GetITStatus(EXTI_Line16) != RESET)
+//	{
+//		PVD_Flag = 1;
+//		/* Clear the Key Button EXTI line pending bit */
+//		EXTI_ClearITPendingBit(EXTI_Line16);
+//	}
+		if(PWR_GetFlagStatus(PWR_FLAG_PVDO)!=RESET) //2018-10-27
+		{
+				//VDD电压低于阈值电压
+			 PVD_Flag = 1;
+		}
+		else
+		{   PVD_Flag =0;
+				//VDD电压高于阈值电压
+		}	
 }
 /******************************************
  BSP 底层初始化
